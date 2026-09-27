@@ -213,7 +213,59 @@ document.addEventListener("DOMContentLoaded", () => {
     const refreshModelsBtn = document.getElementById("refreshModelsBtn");
     const filterChips = document.querySelectorAll(".models-filter-chips .filter-chip");
 
-    // --- 4. Initialize UI State ---
+    // --- 4. Initialize & Synchronize State with @NextoraAI_bot ---
+    function formatTariffLabel(raw) {
+        if (!raw) return "Базовый (Free)";
+        const lower = String(raw).toLowerCase();
+        if (lower.includes("vip") || lower.includes("безлимит")) return "👑 VIP Безлимит";
+        if (lower.includes("pro_plus") || lower.includes("plus")) return "🟣 Pro Plus";
+        if (lower.includes("pro")) return "🔥 Pro Аккаунт";
+        if (lower.includes("free") || lower.includes("бесплат")) return "🟢 Базовый (Free)";
+        return raw;
+    }
+
+    function syncWithBotState() {
+        // Parse parameters passed in URL hash: #uid=...&stars=...&rub=...&tariff=...&model=...
+        const rawHash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
+        const hashParams = new URLSearchParams(rawHash);
+        const searchParams = new URLSearchParams(window.location.search);
+
+        const uid = hashParams.get("uid") || searchParams.get("uid");
+        const stars = hashParams.get("stars") || searchParams.get("stars");
+        const rub = hashParams.get("rub") || searchParams.get("rub");
+        const tariff = hashParams.get("tariff") || searchParams.get("tariff");
+        const model = hashParams.get("model") || searchParams.get("model");
+
+        if (uid) {
+            localStorage.setItem("user_telegram_id", uid);
+        }
+        if (stars !== null && stars !== undefined && stars !== "") {
+            userBalanceStars = parseInt(stars, 10) || 0;
+            localStorage.setItem("user_balance_stars", String(userBalanceStars));
+        }
+        if (rub !== null && rub !== undefined && rub !== "") {
+            userBalanceRub = parseInt(rub, 10) || 0;
+            localStorage.setItem("user_balance_rub", String(userBalanceRub));
+        }
+        if (tariff) {
+            userTariff = formatTariffLabel(tariff);
+            localStorage.setItem("user_tariff", userTariff);
+        }
+        if (model) {
+            const foundModel = REAL_BOT_MODELS.find(m => m.id === model || m.id.endsWith(model) || model.endsWith(m.id));
+            if (foundModel) {
+                activeModel = foundModel.id;
+                activeModelTitle = foundModel.display_name;
+            } else {
+                activeModel = model;
+                activeModelTitle = model.replace("bazaarlink:", "").toUpperCase();
+            }
+            localStorage.setItem("user_selected_model", activeModel);
+            localStorage.setItem("user_selected_model_title", activeModelTitle);
+        }
+    }
+    syncWithBotState();
+
     function updateHeaderUI() {
         if (chatActiveModelNameEl) chatActiveModelNameEl.textContent = activeModelTitle;
         if (starsValEl) {
@@ -243,19 +295,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const user = tg.initDataUnsafe?.user;
-        if (user) {
-            const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ") || "Пользователь";
-            const handle = user.username ? `@${user.username}` : `ID: ${user.id}`;
-            const initial = fullName.charAt(0).toUpperCase() || "AI";
+        const storedUid = localStorage.getItem("user_telegram_id");
+        const effectiveUid = user?.id ? String(user.id) : (storedUid || "Синхронизируется");
+        const fullName = user ? ([user.first_name, user.last_name].filter(Boolean).join(" ") || "Пользователь") : "Пользователь";
+        const handle = user?.username ? `@${user.username}` : `ID: ${effectiveUid}`;
+        const initial = fullName.charAt(0).toUpperCase() || "AI";
 
-            if (userNameEl) userNameEl.textContent = fullName;
-            if (userSubEl) userSubEl.textContent = `${userTariff} • ${handle}`;
-            if (userAvatarEl) userAvatarEl.textContent = initial;
+        if (userNameEl) userNameEl.textContent = fullName;
+        if (userSubEl) userSubEl.textContent = `${userTariff} • ${handle}`;
+        if (userAvatarEl) userAvatarEl.textContent = initial;
 
-            if (profileFullNameEl) profileFullNameEl.textContent = fullName;
-            if (profileUserIdEl) profileUserIdEl.textContent = handle;
-            if (profileAvatarLargeEl) profileAvatarLargeEl.textContent = initial;
-        }
+        if (profileFullNameEl) profileFullNameEl.textContent = fullName;
+        if (profileUserIdEl) profileUserIdEl.textContent = handle;
+        if (profileAvatarLargeEl) profileAvatarLargeEl.textContent = initial;
 
         if (tg.BackButton) {
             tg.BackButton.onClick(() => {
@@ -264,10 +316,12 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     } else {
+        const storedUid = localStorage.getItem("user_telegram_id");
+        const handle = storedUid ? `ID: ${storedUid}` : "Web Mode";
         if (userNameEl) userNameEl.textContent = "Пользователь (Web)";
-        if (userSubEl) userSubEl.textContent = `${userTariff} • Web Mode`;
+        if (userSubEl) userSubEl.textContent = `${userTariff} • ${handle}`;
         if (profileFullNameEl) profileFullNameEl.textContent = "Пользователь (Web)";
-        if (profileUserIdEl) profileUserIdEl.textContent = "Web Browser Mode";
+        if (profileUserIdEl) profileUserIdEl.textContent = handle;
     }
 
     // --- 5. Toast Notifications ---
@@ -1158,6 +1212,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     function openProfileModal() {
+        const storedUid = localStorage.getItem("user_telegram_id");
+        const effectiveUid = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : (storedUid || "Синхронизируется");
         const html = `
             <div style="display:flex; flex-direction:column; gap:12px; text-align:center;">
                 <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#38bdf8,#6366f1); margin:0 auto; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:#fff;">
@@ -1174,26 +1230,50 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div style="font-weight:700; color:#10b981; font-size:13px;">${userTariff}</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                        <span style="font-size:11px; color:var(--tg-hint);">Модель:</span>
+                        <span style="font-size:11px; color:var(--tg-hint);">Баланс:</span>
+                        <div style="font-weight:700; color:var(--accent); font-size:13px;">${userBalanceStars} ⭐ / ${userBalanceRub} ₽</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                        <span style="font-size:11px; color:var(--tg-hint);">Модель в боте:</span>
                         <div style="font-weight:700; color:var(--accent); font-size:13px;">${activeModelTitle}</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                        <span style="font-size:11px; color:var(--tg-hint);">Сообщений:</span>
-                        <div style="font-weight:700; color:#fff; font-size:13px;">${messagesSentCount}</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                        <span style="font-size:11px; color:var(--tg-hint);">Фотографий:</span>
-                        <div style="font-weight:700; color:#fff; font-size:13px;">${photosCount}</div>
+                        <span style="font-size:11px; color:var(--tg-hint);">ID аккаунта:</span>
+                        <div style="font-weight:700; color:#fff; font-size:13px;">${escapeHtml(effectiveUid)}</div>
                     </div>
                 </div>
 
-                <button class="action-btn-primary" style="margin-top:10px;" onclick="closeModal(); switchTab('tab-more');">
-                    ⚙️ Управление аккаунтом
-                </button>
+                <div style="background:rgba(56, 189, 248, 0.08); padding:10px; border-radius:8px; border:1px solid rgba(56, 189, 248, 0.2); font-size:11.5px; color:#94a3b8; text-align:left; line-height:1.4;">
+                    🔄 <strong>Синхронизация с ботом:</strong> Ваш баланс Stars, тариф и выбранная модель привязаны к вашему профилю в <strong>@NextoraAI_bot</strong>.
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+                    <button class="action-btn-primary" onclick="syncWithBotDirectly()">
+                        🔄 Синхронизировать с @NextoraAI_bot
+                    </button>
+                    <button class="agent-btn" onclick="openBalanceModal()">
+                        ⭐ Пополнить баланс Stars
+                    </button>
+                </div>
             </div>
         `;
-        openModal("👤 Профиль пользователя", html);
+        openModal("👤 Профиль и синхронизация", html);
     }
+
+    window.syncWithBotDirectly = function() {
+        const botUsername = "NextoraAI_bot";
+        const link = `https://t.me/${botUsername}?start=sync`;
+        closeModal();
+        showToast("Запрашиваем свежие данные из @NextoraAI_bot...", 2500);
+        if (tg?.openTelegramLink) {
+            setTimeout(() => {
+                tg.openTelegramLink(link);
+                if (tg.close) tg.close();
+            }, 300);
+        } else {
+            window.location.href = link;
+        }
+    };
 
     // Connect Service Boxes in Tab 5
     document.querySelectorAll("[data-action]").forEach(el => {
@@ -1217,30 +1297,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Promo Key Activation
+    // Promo Key / Access Key Activation via @NextoraAI_bot
     if (activateKeyBtn && promoKeyInput) {
         activateKeyBtn.addEventListener("click", () => {
-            const key = promoKeyInput.value.trim().toUpperCase();
+            const key = promoKeyInput.value.trim();
             if (!key) {
-                showToast("Введите ключ доступа");
+                showToast("Введите ключ доступа или промокод");
                 return;
             }
-            if (key === "VIP2026" || key === "PROMAX" || key === "AIWEBAPP") {
-                userTariff = "VIP Безлимит";
-                localStorage.setItem("user_tariff", userTariff);
-                userBalanceStars += 100;
-                localStorage.setItem("user_balance_stars", String(userBalanceStars));
-                updateHeaderUI();
-                promoKeyInput.value = "";
-                showToast("🎉 VIP статус и +100 ⭐ активированы!");
-            } else if (key === "START" || key === "BONUS") {
-                userBalanceRub += 200;
-                localStorage.setItem("user_balance_rub", String(userBalanceRub));
-                updateHeaderUI();
-                promoKeyInput.value = "";
-                showToast("🎉 Начислено +200 ₽ бонуса!");
+            const botUsername = "NextoraAI_bot";
+            const link = `https://t.me/${botUsername}?start=key_${encodeURIComponent(key)}`;
+            showToast("Отправляем ключ в @NextoraAI_bot для активации...", 2500);
+            if (tg?.openTelegramLink) {
+                setTimeout(() => {
+                    tg.openTelegramLink(link);
+                    if (tg.close) tg.close();
+                }, 300);
             } else {
-                showToast("⚠️ Неверный ключ или промокод");
+                window.location.href = link;
             }
         });
     }
@@ -1366,9 +1440,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${isCurrentActive ? '<span class="model-active-check">✓ Выбрана</span>' : ''}
                 </div>
                 <div class="model-item-desc">${escapeHtml(model.desc)}</div>
-                <button class="model-select-btn ${isCurrentActive ? "active" : ""}">
-                    ${isCurrentActive ? "Используется сейчас" : "Выбрать эту модель"}
-                </button>
+                <div style="display:flex; gap:6px; margin-top:8px;">
+                    <button class="model-select-btn ${isCurrentActive ? "active" : ""}" style="flex:1;">
+                        ${isCurrentActive ? "✓ Выбрана в веб" : "Выбрать в веб"}
+                    </button>
+                    <button class="model-sync-bot-btn" style="flex:1; padding:9px 6px; font-size:11.5px; border-radius:8px; border:1px solid rgba(56, 189, 248, 0.4); background:rgba(56, 189, 248, 0.12); color:var(--accent); cursor:pointer; font-weight:600;" onclick="event.stopPropagation(); syncModelToBot('${model.id}', '${escapeHtml(model.display_name)}')">
+                        ⚡ В @NextoraAI_bot
+                    </button>
+                </div>
             `;
 
             const selectBtn = card.querySelector(".model-select-btn");
@@ -1384,6 +1463,21 @@ document.addEventListener("DOMContentLoaded", () => {
             dynamicModelListEl.appendChild(card);
         });
     }
+
+    window.syncModelToBot = function(modelId, modelName) {
+        const cleanId = modelId.replace("bazaarlink:", "");
+        const botUsername = "NextoraAI_bot";
+        const link = `https://t.me/${botUsername}?start=setmodel_${encodeURIComponent(cleanId)}`;
+        showToast(`Переключаем модель в @${botUsername}...`, 2000);
+        if (tg?.openTelegramLink) {
+            setTimeout(() => {
+                tg.openTelegramLink(link);
+                if (tg.close) tg.close();
+            }, 300);
+        } else {
+            window.location.href = link;
+        }
+    };
 
     function activateModel(model) {
         activeModel = model.id;

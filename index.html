@@ -228,7 +228,10 @@
                             <span id="profileUserId">ID: 00000000</span>
                         </div>
                     </div>
-                    <button class="profile-btn" data-action="menu:profile">Профиль</button>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <button class="profile-btn" data-action="menu:profile">Профиль</button>
+                        <button class="agent-btn" style="padding:4px 8px; font-size:11px; border:1px solid rgba(56, 189, 248, 0.4); background:rgba(56, 189, 248, 0.1);" onclick="syncWithBotDirectly()">🔄 Синхр.</button>
+                    </div>
                 </div>
 
                 <!-- Quick Services Grid -->
