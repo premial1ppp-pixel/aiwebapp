@@ -662,7 +662,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!content || !content.trim()) {
             throw new Error("Пустой ответ от нейросети");
         }
-        return content.trim();
+        return stripProviderAdvertisements(content);
+    }
+
+    function stripProviderAdvertisements(text) {
+        if (!text) return "";
+        let cleaned = text;
+        cleaned = cleaned.replace(/\n*-{3,}\s*\n+support pollinations\.ai:[\s\S]*$/gi, "");
+        cleaned = cleaned.replace(/\n*-{3,}\s*\n*🌸\s*ad\s*🌸[\s\S]*$/gi, "");
+        cleaned = cleaned.replace(/\n*🌸\s*ad\s*🌸[\s\S]*$/gi, "");
+        cleaned = cleaned.replace(/\n*support pollinations\.ai:[\s\S]*$/gi, "");
+        cleaned = cleaned.replace(/\n*powered by pollinations(?:\.ai)?[\s\S]*$/gi, "");
+        cleaned = cleaned.replace(/\n*-{3,}\s*\n*powered by pollinations[\s\S]*$/gi, "");
+        cleaned = cleaned.replace(/\[support our mission\]\(https?:\/\/pollinations\.ai[^\)]*\)[^\n]*/gi, "");
+        cleaned = cleaned.replace(/https?:\/\/pollinations\.ai\/redirect\/\S*/gi, "");
+        cleaned = cleaned.replace(/\bkeep ai accessible for everyone\.?\b/gi, "");
+        cleaned = cleaned.replace(/\n+-{3,}\s*$/g, "");
+        return cleaned.trim();
     }
 
     function speakText(text) {
