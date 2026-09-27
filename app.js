@@ -932,48 +932,75 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast(`Запущена игра: ${game.title}`);
     };
 
-    // --- 14. Modals Logic & Interactive States ---
+    // --- 14. Modals Logic & Real Stars Payment Integration ---
     function openBalanceModal() {
         const html = `
             <div style="display:flex; flex-direction:column; gap:14px;">
                 <div style="background:rgba(255,255,255,0.06); padding:16px; border-radius:12px; text-align:center;">
-                    <div style="font-size:12px; color:var(--tg-hint); text-transform:uppercase;">Текущий баланс</div>
+                    <div style="font-size:12px; color:var(--tg-hint); text-transform:uppercase;">Текущий баланс аккаунта</div>
                     <div style="font-size:28px; font-weight:800; color:var(--accent); margin:6px 0;">
                         ${userBalanceStars} ⭐ / ${userBalanceRub} ₽
                     </div>
-                    <div style="font-size:12px; color:#10b981;">● Аккаунт активен (Лимиты сняты)</div>
+                    <div style="font-size:12px; color:#10b981;">● Синхронизировано с @NextoraAI_bot</div>
                 </div>
 
-                <div style="font-size:13px; font-weight:700; color:var(--tg-text);">Пополнение через Telegram Stars:</div>
-                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
-                    <button class="action-btn-primary" style="padding:10px 6px; font-size:12px;" onclick="addDemoBalance(50, 0)">+50 ⭐ (50₽)</button>
-                    <button class="action-btn-primary" style="padding:10px 6px; font-size:12px;" onclick="addDemoBalance(150, 0)">+150 ⭐ (150₽)</button>
-                    <button class="action-btn-primary" style="padding:10px 6px; font-size:12px;" onclick="addDemoBalance(500, 0)">+500 ⭐ (500₽)</button>
+                <div style="font-size:13px; font-weight:700; color:var(--tg-text);">Официальное пополнение через Telegram Stars:</div>
+                <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;">
+                    <button class="action-btn-primary" style="padding:12px 8px; font-size:13px;" onclick="requestStarsPayment('50')">⭐ 50 Stars (50 ₽)</button>
+                    <button class="action-btn-primary" style="padding:12px 8px; font-size:13px;" onclick="requestStarsPayment('100')">⭐ 100 Stars (100 ₽)</button>
+                    <button class="action-btn-primary" style="padding:12px 8px; font-size:13px;" onclick="requestStarsPayment('250')">⭐ 250 Stars (250 ₽)</button>
+                    <button class="action-btn-primary" style="padding:12px 8px; font-size:13px;" onclick="requestStarsPayment('500')">⭐ 500 Stars (500 ₽)</button>
+                </div>
+
+                <div style="background:rgba(56, 189, 248, 0.08); padding:10px 12px; border-radius:8px; border:1px solid rgba(56, 189, 248, 0.2); font-size:11.5px; color:#94a3b8; line-height:1.4;">
+                    ℹ️ <strong>Как происходит оплата:</strong> При нажатии бот <strong>@NextoraAI_bot</strong> автоматически выставит вам официальный счёт Telegram Stars в чате. После подтверждения оплаты звёзды моментально начисляются на баланс!
                 </div>
 
                 <div style="font-size:13px; font-weight:700; color:var(--tg-text);">Пополнение в рублях (СБП / Карта):</div>
-                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
-                    <button class="agent-btn" style="padding:10px 6px; font-size:12px;" onclick="addDemoBalance(0, 100)">+100 ₽</button>
-                    <button class="agent-btn" style="padding:10px 6px; font-size:12px;" onclick="addDemoBalance(0, 300)">+300 ₽</button>
-                    <button class="agent-btn" style="padding:10px 6px; font-size:12px;" onclick="addDemoBalance(0, 1000)">+1000 ₽</button>
-                </div>
-
-                <div style="font-size:11.5px; color:var(--tg-hint); line-height:1.4;">
-                    ℹ️ В официальном боте также доступна прямая оплата инвойсом в чате через команду <code>/buy_stars</code>.
+                <div style="display:grid; grid-template-columns:1fr; gap:8px;">
+                    <button class="agent-btn" style="padding:10px 8px; font-size:12.5px;" onclick="requestRubPayment()">
+                        💳 Оплатить в рублях через @NextoraAI_bot
+                    </button>
                 </div>
             </div>
         `;
-        openModal("💰 Баланс и пополнение", html);
+        openModal("💰 Пополнение баланса Stars", html);
     }
 
-    window.addDemoBalance = function(stars, rub) {
-        userBalanceStars += stars;
-        userBalanceRub += rub;
-        localStorage.setItem("user_balance_stars", String(userBalanceStars));
-        localStorage.setItem("user_balance_rub", String(userBalanceRub));
-        updateHeaderUI();
+    window.requestStarsPayment = function(amount) {
+        const botUsername = "NextoraAI_bot";
+        const link = `https://t.me/${botUsername}?start=topup_stars_${amount}`;
+        
         closeModal();
-        showToast(`Баланс пополнен: +${stars ? stars + ' ⭐' : ''} ${rub ? rub + ' ₽' : ''}`);
+        showToast(`Перенаправляем в @${botUsername} для оплаты ${amount} ⭐...`, 2500);
+
+        if (tg?.openTelegramLink) {
+            setTimeout(() => {
+                tg.openTelegramLink(link);
+                if (tg.close) tg.close();
+            }, 300);
+        } else {
+            setTimeout(() => {
+                window.location.href = link;
+            }, 300);
+        }
+    };
+
+    window.requestRubPayment = function() {
+        const botUsername = "NextoraAI_bot";
+        const link = `https://t.me/${botUsername}?start=topup_rub`;
+        closeModal();
+        showToast("Открываем @NextoraAI_bot для оплаты...", 2000);
+        if (tg?.openTelegramLink) {
+            setTimeout(() => {
+                tg.openTelegramLink(link);
+                if (tg.close) tg.close();
+            }, 300);
+        } else {
+            setTimeout(() => {
+                window.location.href = link;
+            }, 300);
+        }
     };
 
     function openTariffsModal() {
@@ -996,8 +1023,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span style="color:var(--accent); font-weight:700;">490 ₽ / мес</span>
                     </div>
                     <p style="font-size:12px; color:var(--tg-hint); margin:6px 0;">Приоритет в очереди, безлимитный DeepSeek V4 Pro & Claude Opus, 500 МБ хранилища.</p>
-                    <button class="action-btn-primary" style="width:100%;" onclick="setUserTariff('Pro')">
-                        ${userTariff.includes('Pro') ? '✓ Текущий тариф' : 'Активировать Pro'}
+                    <button class="action-btn-primary" style="width:100%;" onclick="requestSubscriptionPayment('pro_3', 'Pro подписки')">
+                        💳 Оформить Pro через @NextoraAI_bot
                     </button>
                 </div>
 
@@ -1007,14 +1034,31 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span style="color:#a78bfa; font-weight:700;">990 ₽ / мес</span>
                     </div>
                     <p style="font-size:12px; color:var(--tg-hint); margin:6px 0;">Полный доступ ко всем возможностям, автономный AI-агент, 2 ГБ хранилища B2.</p>
-                    <button class="action-btn-primary" style="width:100%; background:linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="setUserTariff('VIP Безлимит')">
-                        ${userTariff.includes('VIP') ? '✓ Текущий тариф' : 'Активировать VIP'}
+                    <button class="action-btn-primary" style="width:100%; background:linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="requestSubscriptionPayment('pro_plus_1', 'VIP подписки')">
+                        👑 Оформить VIP через @NextoraAI_bot
                     </button>
                 </div>
             </div>
         `;
         openModal("💎 Тарифы и подписки", html);
     }
+
+    window.requestSubscriptionPayment = function(planId, title) {
+        const botUsername = "NextoraAI_bot";
+        const link = `https://t.me/${botUsername}?start=sub_${planId}`;
+        closeModal();
+        showToast(`Перенаправляем в @${botUsername} для оплаты ${title}...`, 2500);
+        if (tg?.openTelegramLink) {
+            setTimeout(() => {
+                tg.openTelegramLink(link);
+                if (tg.close) tg.close();
+            }, 300);
+        } else {
+            setTimeout(() => {
+                window.location.href = link;
+            }, 300);
+        }
+    };
 
     window.setUserTariff = function(tariffName) {
         userTariff = tariffName;
