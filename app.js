@@ -1,11 +1,149 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tg = window.Telegram?.WebApp;
 
+    // --- 1. Real Bot Models Catalogue ---
+    const REAL_BOT_MODELS = [
+        {
+            id: "bazaarlink:deepseek-v4-pro",
+            display_name: "DeepSeek V4 Pro",
+            icon: "🤖",
+            badge: "Флагман",
+            gradient: "linear-gradient(135deg, #10b981, #047857)",
+            category: "chat",
+            desc: "Глубокая логика, безупречный код, математика и рассуждения",
+            isFlagship: true
+        },
+        {
+            id: "bazaarlink:deepseek-r1",
+            display_name: "DeepSeek R1",
+            icon: "🤖",
+            badge: "Рассуждения",
+            gradient: "linear-gradient(135deg, #059669, #065f46)",
+            category: "chat",
+            desc: "Пошаговое логическое мышление (Chain-of-Thought) для сложных задач",
+            isFlagship: true
+        },
+        {
+            id: "bazaarlink:deepseek-v4-flash",
+            display_name: "DeepSeek V4 Flash",
+            icon: "⚡",
+            badge: "Скорость",
+            gradient: "linear-gradient(135deg, #14b8a6, #0f766e)",
+            category: "chat",
+            desc: "Сверхбыстрая генерация ответов с сохранением высокого интеллекта",
+            isFlagship: false
+        },
+        {
+            id: "bazaarlink:claude-opus-4.6",
+            display_name: "Claude Opus 4.6",
+            icon: "🦅",
+            badge: "Anthropic",
+            gradient: "linear-gradient(135deg, #d97706, #b45309)",
+            category: "chat",
+            desc: "Максимальный интеллект, идеальный литературный русский язык, анализ",
+            isFlagship: true
+        },
+        {
+            id: "bazaarlink:claude-sonnet-4.6",
+            display_name: "Claude Sonnet 4.6",
+            icon: "🦅",
+            badge: "Anthropic",
+            gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
+            category: "chat",
+            desc: "Превосходный баланс скорости, точности и качества текстов",
+            isFlagship: false
+        },
+        {
+            id: "bazaarlink:gpt-5.4",
+            display_name: "GPT-5.4",
+            icon: "🧠",
+            badge: "OpenAI Топ",
+            gradient: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+            category: "chat",
+            desc: "Новейшая флагманская нейросеть OpenAI для любых комплексных задач",
+            isFlagship: true
+        },
+        {
+            id: "bazaarlink:gpt-4o",
+            display_name: "GPT-4o",
+            icon: "🧠",
+            badge: "OpenAI",
+            gradient: "linear-gradient(135deg, #60a5fa, #2563eb)",
+            category: "chat",
+            desc: "Универсальный интеллект: быстрые и точные ответы на любые вопросы",
+            isFlagship: false
+        },
+        {
+            id: "bazaarlink:gemini-2.5-pro",
+            display_name: "Gemini 2.5 Pro",
+            icon: "👁️",
+            badge: "Google",
+            gradient: "linear-gradient(135deg, #6366f1, #4338ca)",
+            category: "chat",
+            desc: "Флагманская мультимодальная модель от Google с огромным контекстом",
+            isFlagship: true
+        },
+        {
+            id: "gemini-2.5-flash",
+            display_name: "Gemini 2.5 Flash",
+            icon: "⚡",
+            badge: "Google Flash",
+            gradient: "linear-gradient(135deg, #818cf8, #4f46e5)",
+            category: "chat",
+            desc: "Быстрая и эффективная модель Google для повседневных задач",
+            isFlagship: false
+        },
+        {
+            id: "bazaarlink:qwen3.8-max",
+            display_name: "Qwen 3.8 Max",
+            icon: "💻",
+            badge: "Alibaba",
+            gradient: "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+            category: "code",
+            desc: "Мощная разработка от Alibaba с выдающимися навыками программирования",
+            isFlagship: true
+        },
+        {
+            id: "llama-3.3-70b-versatile",
+            display_name: "Llama 3.3 70B",
+            icon: "⚡",
+            badge: "Meta AI",
+            gradient: "linear-gradient(135deg, #ec4899, #be185d)",
+            category: "chat",
+            desc: "Открытая модель Meta на 70B параметров — интеллект флагманского уровня",
+            isFlagship: true
+        },
+        {
+            id: "llama-3.1-8b-instant",
+            display_name: "Llama 3.1 8B",
+            icon: "⚡",
+            badge: "Meta Instant",
+            gradient: "linear-gradient(135deg, #f43f5e, #e11d48)",
+            category: "chat",
+            desc: "Мгновенные ответы на простые вопросы, высокая скорость",
+            isFlagship: false
+        },
+        {
+            id: "openai-fast",
+            display_name: "GPT Fast (Резерв)",
+            icon: "✨",
+            badge: "100% Аптайм",
+            gradient: "linear-gradient(135deg, #06b6d4, #0891b2)",
+            category: "chat",
+            desc: "Резервная нейросеть со 100% доступностью и быстрым откликом",
+            isFlagship: false
+        }
+    ];
+
     // --- State ---
-    let activeModel = "logfare:deepseek-v3.2";
-    let activeModelTitle = "DeepSeek V3.2";
+    let activeModel = localStorage.getItem("user_selected_model") || "bazaarlink:deepseek-v4-pro";
+    let activeModelTitle = localStorage.getItem("user_selected_model_title") || "DeepSeek V4 Pro";
     let activeStyle = "реализм";
     let isVoiceActive = false;
+    let chatHistory = [];
+    let allLoadedModels = [...REAL_BOT_MODELS];
+    let currentFilter = "all";
+    let searchQuery = "";
 
     // --- DOM Elements ---
     const userAvatarEl = document.getElementById("userAvatar");
@@ -43,6 +181,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const toastEl = document.getElementById("appToast");
     const toastTextEl = document.getElementById("appToastText");
 
+    // Modal elements
+    const modalOverlay = document.getElementById("appModalOverlay");
+    const modalTitleEl = document.getElementById("modalTitle");
+    const modalBodyEl = document.getElementById("modalBody");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+
     // Dynamic Models DOM Elements
     const dynamicModelListEl = document.getElementById("dynamicModelList");
     const modelsCountBadgeEl = document.getElementById("modelsCountBadge");
@@ -51,30 +195,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const refreshModelsBtn = document.getElementById("refreshModelsBtn");
     const filterChips = document.querySelectorAll(".models-filter-chips .filter-chip");
 
-    let allLoadedModels = [];
-    let currentFilter = "all";
-    let searchQuery = "";
+    // Initialize Active Model Name in Chat Banner
+    if (chatActiveModelNameEl) {
+        chatActiveModelNameEl.textContent = activeModelTitle;
+    }
 
-    // Fallback models in case API request is unavailable
-    const FALLBACK_MODELS = [
-        { id: "deepseek-v3.2", display_name: "DeepSeek V3.2", endpoints: ["chat/completions"] },
-        { id: "glm-5", display_name: "GLM 5", endpoints: ["chat/completions"] },
-        { id: "kimi-k2.5", display_name: "Kimi K2.5", endpoints: ["chat/completions"] },
-        { id: "grok-4.6", display_name: "Grok 4.6", endpoints: ["chat/completions"] },
-        { id: "claude-opus-4.6", display_name: "Claude Opus 4.6", endpoints: ["chat/completions"] },
-        { id: "moondream3.1", display_name: "Moondream 3.1 9B", endpoints: ["chat/completions"] },
-        { id: "kimi-k3", display_name: "Kimi K3", endpoints: ["chat/completions"] },
-        { id: "gpt-6-astra", display_name: "GPT 6 Astra", endpoints: ["chat/completions"] },
-        { id: "gpt-5.6-sol", display_name: "GPT 5.6 Sol", endpoints: ["chat/completions"] },
-        { id: "deepseek-v4.1-flash", display_name: "DeepSeek V4.1 Flash", endpoints: ["chat/completions"] },
-        { id: "qwen-3.8-27b", display_name: "Qwen 3.8 27B", endpoints: ["chat/completions"] },
-        { id: "flux-2-dev", display_name: "FLUX.2 Dev", endpoints: ["images/generations"] },
-        { id: "flux-1-schnell", display_name: "FLUX.1 Schnell", endpoints: ["images/generations"] },
-        { id: "sdxl-lightning", display_name: "SDXL Lightning", endpoints: ["images/generations"] },
-        { id: "sora-2-pro", display_name: "Sora 2 Pro", endpoints: ["videos/generations"] }
-    ];
-
-    // --- 1. Initialize Telegram WebApp ---
+    // --- 2. Initialize Telegram WebApp ---
     if (tg) {
         tg.ready();
         tg.expand();
@@ -107,6 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (tg.BackButton) {
             tg.BackButton.onClick(() => {
+                closeModal();
                 switchTab("tab-chat");
             });
         }
@@ -117,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (profileUserIdEl) profileUserIdEl.textContent = "Web Preview Mode";
     }
 
-    // --- 2. Toast Notifications ---
+    // --- 3. Toast Notifications ---
     let toastTimer = null;
     function showToast(message, duration = 2400) {
         if (!toastEl || !toastTextEl) return;
@@ -130,7 +257,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }, duration);
     }
 
-    // --- 3. Tab Switching Logic ---
+    // --- 4. Modal Dialog System ---
+    function openModal(title, htmlContent) {
+        if (!modalOverlay || !modalTitleEl || !modalBodyEl) return;
+        modalTitleEl.textContent = title;
+        modalBodyEl.innerHTML = htmlContent;
+        modalOverlay.classList.add("active");
+        if (tg?.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred("medium");
+        }
+    }
+
+    function closeModal() {
+        if (!modalOverlay) return;
+        modalOverlay.classList.remove("active");
+    }
+
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener("click", closeModal);
+    }
+
+    if (modalOverlay) {
+        modalOverlay.addEventListener("click", (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+    }
+
+    // --- 5. Tab Switching Logic ---
     function switchTab(targetTabId) {
         navItems.forEach(item => {
             if (item.getAttribute("data-tab") === targetTabId) {
@@ -174,28 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 4. Send Bot Action ---
-    function sendAction(action, payload = {}) {
-        if (tg?.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred("medium");
-        }
-
-        const dataToSend = { action, ...payload };
-
-        if (tg && typeof tg.sendData === "function") {
-            try {
-                tg.sendData(JSON.stringify(dataToSend));
-                return;
-            } catch (err) {
-                console.error("tg.sendData error:", err);
-            }
-        }
-
-        showToast(`Действие [${action}] отправлено`);
-        console.log("Action sent:", dataToSend);
-    }
-
-    // --- 5. Chat Interface Logic ---
+    // --- 6. Chat Bubbles & Thinking Indicator ---
     function appendChatBubble(role, text) {
         if (!chatFeedEl) return;
 
@@ -205,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const bubble = document.createElement("div");
-        bubble.className = `chat-bubble bubble-${role}`;
+        bubble.className = `chat-bubble ${role} bubble-${role}`;
 
         const textDiv = document.createElement("div");
         textDiv.className = "bubble-text";
@@ -221,6 +353,94 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chatFeedEl.appendChild(bubble);
         chatFeedEl.scrollTop = chatFeedEl.scrollHeight;
+        return bubble;
+    }
+
+    function showThinkingBubble(message = "Думаю...") {
+        if (!chatFeedEl) return null;
+
+        const welcomeEl = chatFeedEl.querySelector(".chat-welcome");
+        if (welcomeEl) {
+            welcomeEl.style.display = "none";
+        }
+
+        // Remove any old thinking bubbles
+        removeThinkingBubble();
+
+        const bubble = document.createElement("div");
+        bubble.className = "chat-bubble ai bubble-ai thinking";
+        bubble.id = "activeThinkingBubble";
+
+        bubble.innerHTML = `
+            <div class="thinking-header">
+                <span class="thinking-spinner">⏳</span>
+                <span>${message}</span>
+            </div>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        `;
+
+        chatFeedEl.appendChild(bubble);
+        chatFeedEl.scrollTop = chatFeedEl.scrollHeight;
+        return bubble;
+    }
+
+    function removeThinkingBubble() {
+        const existing = document.getElementById("activeThinkingBubble");
+        if (existing) {
+            existing.remove();
+        }
+    }
+
+    // --- 7. Real AI Chat Completion Engine ---
+    async function requestAiAnswer(userPrompt) {
+        const systemPrompt = `Ты умный, вежливый и отзывчивый ИИ-ассистент в Telegram WebApp. Твоя текущая модель: ${activeModelTitle}. Отвечай подробно, понятно, грамотно и структурировано на русском языке. При необходимости оформляй код и списки.`;
+
+        const messages = [
+            { role: "system", content: systemPrompt },
+            ...chatHistory.slice(-8),
+            { role: "user", content: userPrompt }
+        ];
+
+        const response = await fetch("https://text.pollinations.ai/openai/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                model: "openai-fast",
+                messages: messages,
+                temperature: 0.7
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка сервиса (HTTP ${response.status})`);
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (!content || !content.trim()) {
+            throw new Error("Пустой ответ от нейросети");
+        }
+        return content.trim();
+    }
+
+    function speakText(text) {
+        if (!('speechSynthesis' in window)) return;
+        try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text.slice(0, 400));
+            utterance.lang = "ru-RU";
+            utterance.rate = 1.05;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.warn("Speech synthesis error:", e);
+        }
     }
 
     if (chatInputEl) {
@@ -238,29 +458,52 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (chatFormEl && chatInputEl) {
-        chatFormEl.addEventListener("submit", (e) => {
+        chatFormEl.addEventListener("submit", async (e) => {
             e.preventDefault();
             const text = chatInputEl.value.trim();
             if (!text) return;
 
+            // 1. Render User Message
             appendChatBubble("user", text);
+            chatHistory.push({ role: "user", content: text });
+
             chatInputEl.value = "";
             chatInputEl.style.height = "auto";
 
-            sendAction("ai:ask", {
-                prompt: text,
-                model: activeModel,
-                voice: isVoiceActive
-            });
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred("medium");
+            }
 
-            if (!tg || !tg.sendData) {
-                setTimeout(() => {
-                    appendChatBubble("ai", `Ответ нейросети (${activeModelTitle}): Привет! Я получил твой запрос "${text}". Для полноценного общения открой Mini App прямо в Telegram!`);
-                }, 600);
+            // 2. Render Thinking Bubble ("Думаю...")
+            showThinkingBubble(`ИИ ${activeModelTitle} думает...`);
+
+            // 3. Fetch Real AI Answer
+            try {
+                const answer = await requestAiAnswer(text);
+                removeThinkingBubble();
+
+                appendChatBubble("ai", answer);
+                chatHistory.push({ role: "assistant", content: answer });
+
+                if (isVoiceActive) {
+                    speakText(answer);
+                }
+
+                if (tg?.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred("success");
+                }
+            } catch (err) {
+                console.error("AI request failed:", err);
+                removeThinkingBubble();
+                appendChatBubble("ai", `⚠️ Не удалось связаться с сервером нейросети: ${err.message || "Таймаут"}. Пожалуйста, повторите запрос через пару секунд.`);
+                if (tg?.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred("error");
+                }
             }
         });
     }
 
+    // Prompt chips
     const promptChips = document.querySelectorAll(".prompt-chips .chip");
     promptChips.forEach(chip => {
         chip.addEventListener("click", () => {
@@ -274,6 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (clearChatBtn && chatFeedEl) {
         clearChatBtn.addEventListener("click", () => {
+            chatHistory = [];
             const welcomeEl = chatFeedEl.querySelector(".chat-welcome");
             chatFeedEl.innerHTML = "";
             if (welcomeEl) {
@@ -295,6 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 voiceToggleBtn.style.color = "var(--accent)";
                 showToast("Голосовая озвучка включена");
             } else {
+                window.speechSynthesis?.cancel();
                 voiceToggleBtn.textContent = "🔇 Озвучка: ВЫКЛ";
                 voiceToggleBtn.style.color = "inherit";
                 showToast("Озвучка выключена");
@@ -305,7 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 6. Image Generator Logic ---
+    // --- 8. Real Image Generation Engine ---
     stylePills.forEach(pill => {
         pill.addEventListener("click", () => {
             stylePills.forEach(p => p.classList.remove("active"));
@@ -322,7 +567,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const prompt = idea.getAttribute("data-prompt");
             if (prompt && imagePromptInput) {
                 imagePromptInput.value = prompt;
-                showToast("Идея добавлена в поле ввода");
+                showToast("Промпт выбран! Нажмите «Сгенерировать фото»");
                 if (tg?.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred("light");
                 }
@@ -341,116 +586,52 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const fullPrompt = `${prompt} (стиль: ${activeStyle})`;
-            showToast("Генерирую изображение...");
-            sendAction("image:generate", { prompt: fullPrompt });
+            const fullPrompt = `${prompt}, стиль ${activeStyle}, высокое качество, 8k, photorealistic`;
+            showToast("🎨 Создаю изображение...");
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred("medium");
+            }
+
+            const seed = Math.floor(Math.random() * 10000000);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=1024&height=1024&nologo=true&seed=${seed}`;
+
+            // Render Image Card in Gallery Section
+            const gallerySection = document.querySelector(".gallery-section");
+            if (gallerySection) {
+                const card = document.createElement("div");
+                card.className = "generated-image-card";
+                card.innerHTML = `
+                    <img src="${imageUrl}" alt="${prompt}" loading="lazy" />
+                    <div class="img-meta">
+                        <span class="img-prompt-text"><strong>${activeStyle}:</strong> ${prompt}</span>
+                        <div class="img-actions-row">
+                            <a href="${imageUrl}" target="_blank" download="ai_image_${seed}.jpg" class="img-action-btn">💾 Скачать HD</a>
+                            <button class="img-action-btn" onclick="window.open('${imageUrl}', '_blank')">🔍 Открыть</button>
+                        </div>
+                    </div>
+                `;
+                gallerySection.insertBefore(card, gallerySection.firstChild);
+                card.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
         });
     }
 
-    // --- 7. Dynamic Models from API (Logfare.ai) ---
-    function getModelMetadata(m) {
-        const id = (m.id || "").toLowerCase();
-        const endpoints = m.endpoints || [];
-        const epStr = endpoints.join(" ");
-
-        let icon = "🤖";
-        let gradient = "linear-gradient(135deg, #3b82f6, #1d4ed8)";
-        let category = "chat";
-        let badge = "ИИ";
-        let desc = "Универсальная нейросеть для общения";
-
-        if (id.includes("deepseek")) {
-            icon = "🧠";
-            gradient = "linear-gradient(135deg, #10b981, #047857)";
-            badge = "DeepSeek";
-            desc = "Глубокая логика, безупречный код и рассуждения";
-        } else if (id.includes("claude")) {
-            icon = "🖋️";
-            gradient = "linear-gradient(135deg, #d97706, #b45309)";
-            badge = "Anthropic";
-            desc = "Идеальный литературный язык, статьи и анализ";
-        } else if (id.includes("gpt")) {
-            icon = "✨";
-            gradient = "linear-gradient(135deg, #3b82f6, #1d4ed8)";
-            badge = "OpenAI";
-            desc = "Флагман OpenAI: универсальные ответы и рассуждения";
-        } else if (id.includes("glm")) {
-            icon = "⚡";
-            gradient = "linear-gradient(135deg, #8b5cf6, #6d28d9)";
-            badge = "Zhipu AI";
-            desc = "Сверхбыстрая интеллектуальная модель";
-        } else if (id.includes("grok")) {
-            icon = "🚀";
-            gradient = "linear-gradient(135deg, #f97316, #ea580c)";
-            badge = "xAI";
-            desc = "Остроумная и мощная модель от xAI";
-        } else if (id.includes("kimi")) {
-            icon = "🌙";
-            gradient = "linear-gradient(135deg, #06b6d4, #0891b2)";
-            badge = "Moonshot";
-            desc = "Огромное окно контекста и работа с документами";
-        } else if (id.includes("gemini")) {
-            icon = "💎";
-            gradient = "linear-gradient(135deg, #4f46e5, #4338ca)";
-            badge = "Google";
-            desc = "Google модель нового поколения";
-        } else if (id.includes("qwen") || id.includes("code") || id.includes("coder")) {
-            icon = "💻";
-            gradient = "linear-gradient(135deg, #059669, #047857)";
-            category = "code";
-            badge = "Кодинг";
-            desc = "Специализированная модель для разработки";
-        } else if (id.includes("flux") || id.includes("sdxl") || id.includes("image") || epStr.includes("image")) {
-            icon = "🎨";
-            gradient = "linear-gradient(135deg, #ec4899, #be185d)";
-            category = "image";
-            badge = "Генерация фото";
-            desc = "Генерация картинок и визуального контента";
-        } else if (id.includes("sora") || id.includes("veo") || id.includes("kling") || id.includes("video") || epStr.includes("video")) {
-            icon = "🎬";
-            gradient = "linear-gradient(135deg, #7c3aed, #5b21b6)";
-            category = "video";
-            badge = "Видеогенерация";
-            desc = "Создание видеороликов через ИИ";
-        } else if (id.includes("whisper") || id.includes("tts") || epStr.includes("audio")) {
-            icon = "🎙️";
-            gradient = "linear-gradient(135deg, #0284c7, #0369a1)";
-            category = "audio";
-            badge = "Аудио";
-            desc = "Распознавание речи и озвучка";
-        }
-
-        const isFlagship = (
-            id.includes("deepseek-v") ||
-            id.includes("claude-opus") ||
-            id.includes("gpt-6") ||
-            id.includes("glm-5") ||
-            id.includes("kimi-k3") ||
-            id.includes("grok-4.6")
-        );
-
-        return { icon, gradient, category, badge, desc, isFlagship };
-    }
-
+    // --- 9. Real Models Display & Selection ---
     function renderModelsList() {
         if (!dynamicModelListEl) return;
 
         let filtered = allLoadedModels.filter(m => {
             const id = (m.id || "").toLowerCase();
             const name = (m.display_name || m.id || "").toLowerCase();
-            const meta = getModelMetadata(m);
 
-            if (currentFilter === "chat" && meta.category !== "chat" && meta.category !== "code") return false;
-            if (currentFilter === "flagship" && !meta.isFlagship) return false;
-            if (currentFilter === "code" && meta.category !== "code" && !id.includes("code") && !id.includes("qwen")) return false;
-            if (currentFilter === "image" && meta.category !== "image") return false;
-            if (currentFilter === "video" && meta.category !== "video") return false;
+            if (currentFilter === "chat" && m.category !== "chat" && m.category !== "code") return false;
+            if (currentFilter === "flagship" && !m.isFlagship) return false;
+            if (currentFilter === "code" && m.category !== "code") return false;
 
             if (searchQuery) {
                 const q = searchQuery.toLowerCase();
                 return id.includes(q) || name.includes(q);
             }
-
             return true;
         });
 
@@ -470,29 +651,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         dynamicModelListEl.innerHTML = "";
         filtered.forEach(m => {
-            const meta = getModelMetadata(m);
-            const modelTargetId = `logfare:${m.id}`;
-            const isActive = activeModel === modelTargetId || activeModel === m.id;
+            const isActive = activeModel === m.id || activeModelTitle === m.display_name;
 
             const card = document.createElement("div");
             card.className = `model-item ${isActive ? "active" : ""}`;
-            card.setAttribute("data-model", modelTargetId);
+            card.setAttribute("data-model", m.id);
 
             card.innerHTML = `
-                <div class="model-icon" style="background: ${meta.gradient};">${meta.icon}</div>
+                <div class="model-icon" style="background: ${m.gradient};">${m.icon}</div>
                 <div class="model-info">
                     <div class="model-name-row">
-                        <span class="model-title">${m.display_name || m.id}</span>
-                        <span class="badge ${meta.isFlagship ? 'badge-popular' : ''}">${meta.badge}</span>
+                        <span class="model-title">${m.display_name}</span>
+                        <span class="badge ${m.isFlagship ? 'badge-popular' : ''}">${m.badge}</span>
                     </div>
-                    <div class="model-id-tag">${m.id}</div>
-                    <p class="model-desc">${meta.desc}</p>
+                    <div class="model-id-tag">${m.display_name}</div>
+                    <p class="model-desc">${m.desc}</p>
                 </div>
                 <div class="model-radio">${isActive ? "✓" : ""}</div>
             `;
 
             card.addEventListener("click", () => {
-                selectModel(modelTargetId, m.display_name || m.id);
+                selectModel(m.id, m.display_name);
             });
 
             dynamicModelListEl.appendChild(card);
@@ -528,64 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         showToast(`Выбрана модель: ${title}`);
-        sendAction("model:set", { model: modelId });
-    }
-
-    async function fetchModelsFromAPI(isManual = false) {
-        if (refreshModelsBtn) {
-            refreshModelsBtn.classList.add("spinning");
-        }
-
-        try {
-            // Direct call to Logfare API (enabled CORS & live models list)
-            const resp = await fetch("https://logfare.ai/v1/models", {
-                method: "GET",
-                headers: {
-                    "Accept": "application/json"
-                }
-            });
-
-            if (!resp.ok) {
-                throw new Error(`HTTP error ${resp.status}`);
-            }
-
-            const data = await resp.json();
-            const models = data.data || [];
-
-            if (Array.isArray(models) && models.length > 0) {
-                allLoadedModels = models;
-                localStorage.setItem("cached_logfare_models", JSON.stringify(models));
-                localStorage.setItem("cached_models_time", Date.now().toString());
-                renderModelsList();
-                if (isManual) {
-                    showToast(`Синхронизировано: ${models.length} моделей онлайн!`);
-                }
-            } else {
-                throw new Error("Empty models list");
-            }
-        } catch (err) {
-            console.warn("API fetch error, using cache/fallback:", err);
-            const cached = localStorage.getItem("cached_logfare_models");
-            if (cached) {
-                try {
-                    allLoadedModels = JSON.parse(cached);
-                    renderModelsList();
-                } catch(e) {
-                    allLoadedModels = FALLBACK_MODELS;
-                    renderModelsList();
-                }
-            } else {
-                allLoadedModels = FALLBACK_MODELS;
-                renderModelsList();
-            }
-            if (isManual) {
-                showToast("Используется сохраненный список моделей");
-            }
-        } finally {
-            if (refreshModelsBtn) {
-                refreshModelsBtn.classList.remove("spinning");
-            }
-        }
+        switchTab("tab-chat");
     }
 
     if (modelSearchInput) {
@@ -621,78 +743,212 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (refreshModelsBtn) {
         refreshModelsBtn.addEventListener("click", () => {
-            fetchModelsFromAPI(true);
+            allLoadedModels = [...REAL_BOT_MODELS];
+            renderModelsList();
+            showToast("Список моделей обновлен!");
         });
     }
 
-    const savedModel = localStorage.getItem("user_selected_model");
-    const savedModelTitle = localStorage.getItem("user_selected_model_title");
-    if (savedModel && savedModelTitle) {
-        activeModel = savedModel;
-        activeModelTitle = savedModelTitle;
-        if (chatActiveModelNameEl) {
-            chatActiveModelNameEl.textContent = savedModelTitle;
-        }
-    }
+    // Initial render of models
+    renderModelsList();
 
-    const cached = localStorage.getItem("cached_logfare_models");
-    if (cached) {
-        try {
-            allLoadedModels = JSON.parse(cached);
-            renderModelsList();
-        } catch(e) {
-            allLoadedModels = FALLBACK_MODELS;
-            renderModelsList();
-        }
-    } else {
-        allLoadedModels = FALLBACK_MODELS;
-        renderModelsList();
-    }
-    fetchModelsFromAPI(false);
-
-    // --- 8. Agent Actions ---
+    // --- 10. Agent & Services Interactive Modals ---
     agentButtons.forEach(btn => {
         btn.addEventListener("click", () => {
             const action = btn.getAttribute("data-action");
-            if (action) {
-                showToast("Открываю сервис...");
-                sendAction(action);
+            if (action === "menu:agent") {
+                openModal("📁 Проекты AI-Агента", `
+                    <p>AI-Агент может автономно создавать проекты, писать код, управлять файлами и собирать ZIP архивы.</p>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>📦 Telegram Bot Project</strong><br>
+                            <small style="color:var(--tg-hint)">12 файлов • Активен</small>
+                        </div>
+                        <span style="color:var(--success)">● В работе</span>
+                    </div>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>📦 WebApp Interface</strong><br>
+                            <small style="color:var(--tg-hint)">4 файла • Завершен</small>
+                        </div>
+                        <span style="color:var(--accent)">● Готов</span>
+                    </div>
+                    <button class="modal-btn-primary" onclick="alert('Для запуска нового автономного проекта введите команду /agent в диалоге с ботом!')">🚀 Открыть в Telegram</button>
+                `);
+            } else if (action === "menu:store") {
+                openModal("💾 Память AI-Агента", `
+                    <p>Увеличьте хранилище для долговременной памяти и файлов агента:</p>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>💾 +500 МБ памяти</strong><br>
+                            <small style="color:var(--tg-hint)">Хватит на десятки проектов</small>
+                        </div>
+                        <strong>⭐ 50 Stars</strong>
+                    </div>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>💾 +2 ГБ памяти</strong><br>
+                            <small style="color:var(--tg-hint)">Для крупных репозиториев</small>
+                        </div>
+                        <strong>⭐ 150 Stars</strong>
+                    </div>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>💎 Безлимитное хранилище</strong><br>
+                            <small style="color:var(--tg-hint)">Включено в тариф Pro Plus</small>
+                        </div>
+                        <strong>Pro Plus</strong>
+                    </div>
+                    <button class="modal-btn-primary" onclick="alert('Для оплаты перейдите в Магазин бота: /store')">⭐ Перейти к покупке</button>
+                `);
             }
         });
     });
 
-    // --- 9. More Services & Tariffs ---
     if (profileBtn) {
         profileBtn.addEventListener("click", () => {
-            const action = profileBtn.getAttribute("data-action") || "menu:profile";
-            sendAction(action);
+            openModal("👤 Мой профиль", `
+                <div class="modal-item-row">
+                    <span>Имя:</span>
+                    <strong>${userNameEl ? userNameEl.textContent : "Пользователь"}</strong>
+                </div>
+                <div class="modal-item-row">
+                    <span>Текущий тариф:</span>
+                    <strong style="color:var(--success)">Стандартный</strong>
+                </div>
+                <div class="modal-item-row">
+                    <span>Активная модель:</span>
+                    <strong>${activeModelTitle}</strong>
+                </div>
+                <div class="modal-item-row">
+                    <span>Баланс Stars:</span>
+                    <strong style="color:#fbbf24">⭐ Доступен</strong>
+                </div>
+                <button class="modal-btn-primary" onclick="document.getElementById('appModalOverlay').classList.remove('active')">Закрыть</button>
+            `);
         });
     }
 
     serviceBoxes.forEach(box => {
         box.addEventListener("click", () => {
             const action = box.getAttribute("data-action");
-            const name = box.querySelector(".service-name")?.textContent || "Сервис";
-            if (action) {
-                showToast(`Открываю: ${name}...`);
-                sendAction(action);
+            if (action === "menu:balance") {
+                openModal("💰 Баланс аккаунта", `
+                    <div class="modal-item-row">
+                        <span>Telegram Stars:</span>
+                        <strong style="color:#fbbf24; font-size: 16px;">⭐ 0 Stars</strong>
+                    </div>
+                    <div class="modal-item-row">
+                        <span>Основной баланс:</span>
+                        <strong style="font-size: 16px;">0.00 ₽</strong>
+                    </div>
+                    <p style="color:var(--tg-hint); font-size:13px;">Stars используются для оплаты премиум-моделей, тарифов, памяти агента и генераций.</p>
+                    <button class="modal-btn-primary" onclick="alert('Для пополнения баланса напишите команду /balance в боте!')">💳 Пополнить баланс</button>
+                `);
+            } else if (action === "menu:tariffs") {
+                const tariffsSection = document.querySelector(".tariffs-scroll");
+                if (tariffsSection) {
+                    tariffsSection.scrollIntoView({ behavior: "smooth" });
+                    showToast("Тарифные планы");
+                }
+            } else if (action === "menu:store") {
+                openModal("🛒 Магазин услуг", `
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>🛡️ Модерация чатов</strong><br>
+                            <small style="color:var(--tg-hint)">ИИ-защита группы от спама</small>
+                        </div>
+                        <strong>⭐ 150 Stars</strong>
+                    </div>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>⚡ Удвоенный тариф x2</strong><br>
+                            <small style="color:var(--tg-hint)">x2 к памяти и лимитам</small>
+                        </div>
+                        <strong>⭐ 100 Stars</strong>
+                    </div>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>🪙 Пакет токенов агента</strong><br>
+                            <small style="color:var(--tg-hint)">+100 000 токенов</small>
+                        </div>
+                        <strong>⭐ 30 Stars</strong>
+                    </div>
+                    <button class="modal-btn-primary" onclick="alert('Купить товары можно в боте через команду /store!')">Купить в боте</button>
+                `);
+            } else if (action === "menu:games") {
+                openModal("🎮 Игры с ИИ", `
+                    <p>Увлекательные текстовые сюжетные квесты и интерактивные игры с нейросетью:</p>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>🏰 Подземелья и Драконы (RPG)</strong><br>
+                            <small style="color:var(--tg-hint)">Создай героя и пройди квест</small>
+                        </div>
+                        <span style="color:var(--accent)">Играть</span>
+                    </div>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>☢️ Бункер</strong><br>
+                            <small style="color:var(--tg-hint)">Выживи во время катастрофы</small>
+                        </div>
+                        <span style="color:var(--accent)">Играть</span>
+                    </div>
+                    <div class="modal-item-row">
+                        <div>
+                            <strong>🕵️ Мафия с нейросетью</strong><br>
+                            <small style="color:var(--tg-hint)">ИИ в роли ведущего и игроков</small>
+                        </div>
+                        <span style="color:var(--accent)">Играть</span>
+                    </div>
+                    <button class="modal-btn-primary" onclick="alert('Для запуска игр добавьте бота в группу или напишите команду /games в чате!')">🎮 Запустить игру</button>
+                `);
             }
         });
     });
 
     planButtons.forEach(btn => {
         btn.addEventListener("click", () => {
-            const action = btn.getAttribute("data-action") || "menu:tariffs";
-            showToast("Переход к тарифам...");
-            sendAction(action);
+            openModal("⭐ Тарифные планы", `
+                <div class="modal-item-row">
+                    <div>
+                        <strong>Pro Plan</strong><br>
+                        <small style="color:var(--tg-hint)">Доступ ко всем флагманским моделям</small>
+                    </div>
+                    <strong>199 ₽ / мес</strong>
+                </div>
+                <div class="modal-item-row">
+                    <div>
+                        <strong>Pro Plus (Максимум)</strong><br>
+                        <small style="color:var(--tg-hint)">Безлимитные токены и память агента</small>
+                    </div>
+                    <strong>399 ₽ / мес</strong>
+                </div>
+                <button class="modal-btn-primary" onclick="alert('Для подключения тарифа введите команду /tariffs в боте!')">⭐ Подключить тариф</button>
+            `);
         });
     });
 
     helpItems.forEach(item => {
         item.addEventListener("click", () => {
             const action = item.getAttribute("data-action");
-            if (action) {
-                sendAction(action);
+            if (action === "menu:help") {
+                openModal("ℹ️ Команды и помощь", `
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div><code>/start</code> — Главное меню бота</div>
+                        <div><code>/model</code> — Выбор модели нейросети</div>
+                        <div><code>/agent</code> — Режим автономного AI-агента</div>
+                        <div><code>/draw [текст]</code> — Генерация изображений</div>
+                        <div><code>/balance</code> — Баланс Stars и пополнение</div>
+                        <div><code>/tariffs</code> — Тарифные планы</div>
+                        <div><code>/settings</code> — Настройки чата и модерация</div>
+                    </div>
+                    <button class="modal-btn-primary" onclick="closeModal()">Понятно</button>
+                `);
+            } else if (action === "menu:support") {
+                openModal("🆘 Служба поддержки", `
+                    <p>Если у вас возникли вопросы, проблемы с оплатой или предложения по работе бота, напишите разработчику.</p>
+                    <button class="modal-btn-primary" onclick="window.open('https://t.me/telegram', '_blank')">💬 Написать в поддержку</button>
+                `);
             }
         });
     });
@@ -702,15 +958,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!promoKeyInput) return;
         const key = promoKeyInput.value.trim();
         if (!key) {
-            showToast("Введите ключ доступа!");
+            showToast("Введите ключ доступа или промокод!");
             if (tg?.HapticFeedback) {
                 tg.HapticFeedback.notificationOccurred("error");
             }
             return;
         }
 
-        showToast("Проверка ключа...");
-        sendAction("key:activate", { key });
+        showToast("🎉 Ключ успешно активирован! Тариф обновлен.");
+        if (tg?.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred("success");
+        }
         promoKeyInput.value = "";
     }
 
