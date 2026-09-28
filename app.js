@@ -156,6 +156,144 @@ document.addEventListener("DOMContentLoaded", () => {
             desc: "Мгновенные ответы на простые вопросы, высокая скорость",
             isFlagship: false,
             persona: "Ты Llama 3.1 8B — ультра-быстрая компактная нейросеть. Отвечай кратко, емко и по существу."
+        },
+        // OpenRouter
+        {
+            id: "openrouter:anthropic/claude-3.5-sonnet",
+            display_name: "Claude 3.5 Sonnet",
+            icon: "🦅",
+            badge: "OpenRouter",
+            gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
+            category: "chat",
+            desc: "Флагманский интеллект Claude 3.5 Sonnet через OpenRouter",
+            isFlagship: true,
+            persona: "Ты Claude 3.5 Sonnet через OpenRouter — мощнейшая модель для сложного анализа, кода и творчества."
+        },
+        {
+            id: "openrouter:deepseek/deepseek-r1",
+            display_name: "DeepSeek R1",
+            icon: "🤖",
+            badge: "OpenRouter",
+            gradient: "linear-gradient(135deg, #0ea5e9, #0284c7)",
+            category: "chat",
+            desc: "Передовая рассуждающая модель DeepSeek R1 с глубоким мышлением",
+            isFlagship: true,
+            persona: "Ты DeepSeek R1 через OpenRouter — эксперт по глубоким рассуждениям, математике и логике."
+        },
+        {
+            id: "openrouter:openai/gpt-4o",
+            display_name: "GPT-4o",
+            icon: "🧠",
+            badge: "OpenRouter",
+            gradient: "linear-gradient(135deg, #10b981, #059669)",
+            category: "chat",
+            desc: "Всесторонний флагман OpenAI через OpenRouter",
+            isFlagship: false,
+            persona: "Ты GPT-4o через OpenRouter — универсальный ассистент для любых повседневных задач."
+        },
+        // Mistral AI
+        {
+            id: "mistral:mistral-large-latest",
+            display_name: "Mistral Large",
+            icon: "🇫🇷",
+            badge: "Mistral AI",
+            gradient: "linear-gradient(135deg, #ff7000, #e65100)",
+            category: "chat",
+            desc: "Флагманская европейская нейросеть с высочайшим интеллектом и рассуждением",
+            isFlagship: true,
+            persona: "Ты Mistral Large от Mistral AI — европейский флагман с выдающимися языковыми и аналитическими навыками."
+        },
+        {
+            id: "mistral:codestral-latest",
+            display_name: "Codestral",
+            icon: "💻",
+            badge: "Mistral AI",
+            gradient: "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+            category: "code",
+            desc: "Узкоспециализированная модель Mistral для профессионального написания кода",
+            isFlagship: true,
+            persona: "Ты Codestral от Mistral AI — эксперт по программированию на 80+ языках. Пиши чистый и оптимальный код."
+        },
+        // DeepInfra
+        {
+            id: "deepinfra:deepseek-ai/DeepSeek-R1",
+            display_name: "DeepSeek R1",
+            icon: "🤖",
+            badge: "DeepInfra",
+            gradient: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+            category: "chat",
+            desc: "Высокоскоростной DeepSeek R1 с серверной оптимизацией DeepInfra",
+            isFlagship: true,
+            persona: "Ты DeepSeek R1 на мощностях DeepInfra — мощный рассуждающий ИИ для науки, кода и сложных задач."
+        },
+        {
+            id: "deepinfra:meta-llama/Llama-3.3-70B-Instruct",
+            display_name: "Llama 3.3 70B",
+            icon: "⚡",
+            badge: "DeepInfra",
+            gradient: "linear-gradient(135deg, #ec4899, #be185d)",
+            category: "chat",
+            desc: "Быстрый серверный хостинг Llama 3.3 70B от DeepInfra",
+            isFlagship: false,
+            persona: "Ты Llama 3.3 70B через DeepInfra — открытый флагман Meta с быстрым откликом."
+        },
+        // Together AI
+        {
+            id: "together:deepseek-ai/DeepSeek-R1",
+            display_name: "DeepSeek R1",
+            icon: "🤖",
+            badge: "Together AI",
+            gradient: "linear-gradient(135deg, #06b6d4, #0891b2)",
+            category: "chat",
+            desc: "DeepSeek R1 через облачную платформу Together Cloud",
+            isFlagship: true,
+            persona: "Ты DeepSeek R1 через Together AI — высокоточная модель мышления и решения комплексных задач."
+        },
+        {
+            id: "together:meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+            display_name: "Llama 3.1 70B Turbo",
+            icon: "⚡",
+            badge: "Together AI",
+            gradient: "linear-gradient(135deg, #f43f5e, #e11d48)",
+            category: "chat",
+            desc: "Турбо-ускоренная инференс-версия Llama 3.1 70B от Together AI",
+            isFlagship: false,
+            persona: "Ты Llama 3.1 70B Turbo через Together AI — скорость и глубина мышления Meta."
+        },
+        // SambaNova
+        {
+            id: "sambanova:DeepSeek-R1-Distill-Llama-70B",
+            display_name: "DeepSeek R1 Distill",
+            icon: "🤖",
+            badge: "SambaNova",
+            gradient: "linear-gradient(135deg, #6366f1, #4f46e5)",
+            category: "chat",
+            desc: "Дистиллированный DeepSeek R1 на чипах SambaNova SN40L с огромной скоростью",
+            isFlagship: true,
+            persona: "Ты DeepSeek R1 Distill 70B на аппаратных ускорителях SambaNova. Отвечай глубоко и молниеносно."
+        },
+        {
+            id: "sambanova:Meta-Llama-3.3-70B-Instruct",
+            display_name: "Llama 3.3 70B",
+            icon: "⚡",
+            badge: "SambaNova",
+            gradient: "linear-gradient(135deg, #a855f7, #9333ea)",
+            category: "chat",
+            desc: "Llama 3.3 70B на суперкомпьютерной архитектуре SambaNova",
+            isFlagship: false,
+            persona: "Ты Llama 3.3 70B на чипах SambaNova — быстрая и умная модель для широкого круга задач."
+        },
+        // Cerebras
+        {
+            id: "cerebras:llama-3.3-70b",
+            display_name: "Llama 3.3 70B Ultra",
+            icon: "🚀",
+            badge: "Cerebras",
+            gradient: "linear-gradient(135deg, #e11d48, #be123c)",
+            category: "chat",
+            desc: "Сверхскоростной запуск Llama 3.3 70B на кремниевых пластинах Wafer-Scale Engine",
+            isFlagship: true,
+            persona: "Ты Llama 3.3 70B на кремниевых пластинах Cerebras Wafer-Scale Engine — самая быстрая инференс-модель в мире."
         }
     ];
 
