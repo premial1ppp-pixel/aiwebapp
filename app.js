@@ -156,17 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
             desc: "Мгновенные ответы на простые вопросы, высокая скорость",
             isFlagship: false,
             persona: "Ты Llama 3.1 8B — ультра-быстрая компактная нейросеть. Отвечай кратко, емко и по существу."
-        },
-        {
-            id: "openai-fast",
-            display_name: "GPT Fast (Резерв)",
-            icon: "✨",
-            badge: "100% Аптайм",
-            gradient: "linear-gradient(135deg, #06b6d4, #0891b2)",
-            category: "chat",
-            desc: "Резервная нейросеть со 100% доступностью и быстрым откликом",
-            isFlagship: false,
-            persona: "Ты GPT Fast — надежный резервный ИИ-ассистент, готовый мгновенно помочь пользователю с любым вопросом."
         }
     ];
 
