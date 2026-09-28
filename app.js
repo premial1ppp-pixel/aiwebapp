@@ -81,26 +81,48 @@ document.addEventListener("DOMContentLoaded", () => {
             persona: "Ты GPT-4o — универсальный помощник от OpenAI. Отвечай живо, интерактивно, понятно объясняй сложные вещи и помогай пользователю во всем."
         },
         {
-            id: "bazaarlink:gemini-2.5-pro",
-            display_name: "Gemini 2.5 Pro",
-            icon: "👁️",
-            badge: "Google",
-            gradient: "linear-gradient(135deg, #6366f1, #4338ca)",
+            id: "freemodel:gpt-6-luna",
+            display_name: "GPT-6 Luna",
+            icon: "🌙",
+            badge: "Freemodel",
+            gradient: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
             category: "chat",
-            desc: "Флагманская мультимодальная модель от Google с огромным контекстом",
+            desc: "Продвинутая модель нового поколения от Freemodel",
             isFlagship: true,
-            persona: "Ты Gemini 2.5 Pro от Google DeepMind — интеллектуальная модель с широким кругозором, превосходным аналитическим мышлением и способностью синтезировать информацию из любых областей науки и практики."
+            persona: "Ты GPT-6 Luna — продвинутая языковая модель от Freemodel. Отвечай качественно, развернуто и точно."
         },
         {
-            id: "gemini-2.5-flash",
-            display_name: "Gemini 2.5 Flash",
-            icon: "⚡",
-            badge: "Google Flash",
-            gradient: "linear-gradient(135deg, #818cf8, #4f46e5)",
+            id: "freemodel:gpt-6-sol",
+            display_name: "GPT-6 Sol",
+            icon: "☀️",
+            badge: "Freemodel",
+            gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
             category: "chat",
-            desc: "Быстрая и эффективная модель Google для повседневных задач",
+            desc: "Молниеносная и креативная генерация ответов",
             isFlagship: false,
-            persona: "Ты Gemini 2.5 Flash от Google — молниеносная и практичная модель для повседневных задач, мгновенных переводов, подсказок и ответов на вопросы."
+            persona: "Ты GPT-6 Sol — быстрая и яркая модель от Freemodel для решения любых задач."
+        },
+        {
+            id: "completions:grok-code-fast-1",
+            display_name: "Grok Code Fast",
+            icon: "🚀",
+            badge: "Completions",
+            gradient: "linear-gradient(135deg, #0ea5e9, #0284c7)",
+            category: "code",
+            desc: "Быстрое написание и отладка программного кода",
+            isFlagship: true,
+            persona: "Ты Grok Code Fast — специализированный ИИ для мгновенного написания и проверки кода."
+        },
+        {
+            id: "completions:claude-opus-4.6-fast",
+            display_name: "Claude 4.6 Fast",
+            icon: "🦅",
+            badge: "Completions",
+            gradient: "linear-gradient(135deg, #f97316, #ea580c)",
+            category: "chat",
+            desc: "Скоростная версия Claude Opus 4.6 для мгновенного диалога",
+            isFlagship: false,
+            persona: "Ты Claude 4.6 Fast — быстрая версия флагмана с глубоким пониманием нюансов."
         },
         {
             id: "bazaarlink:qwen3.8-max",
